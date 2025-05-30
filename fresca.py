@@ -1,8 +1,8 @@
 from manim import *
 
-%%manim -qm Fresca
+%%manim -qm OpeningManim
 
-class Fresca(ThreeDScene):
+class OpeningManim(ThreeDScene):
     def construct(self):
         title = Tex(r"This is")
         basel = MathTex(           
@@ -31,15 +31,19 @@ class Fresca(ThreeDScene):
             LaggedStart(*[FadeOut(obj, shift=DOWN) for obj in basel]),
         )
         self.wait()
+        self.play(FadeOut(transform_title, shift=DOWN),
+                 FadeOut(title, shift=DOWN),)
+        self.wait()
 
-        axes = Axes(
+        
+        axes2d = Axes(
             x_range=[-8, 8, 1],
             y_range=[-5, 5, 1],
             x_length=12,
             y_length=6,
             axis_config={"include_numbers": False},
         )
-
+        
         def fresca(x):
             if -5 <= x < -4.566:
                 return 1.04 * (-211.17956 * (x + 4.69177)**4 + 2.064)
@@ -54,63 +58,31 @@ class Fresca(ThreeDScene):
             else:
                 return float("nan")
 
-        graph = axes.plot(fresca, x_range=[-5, 5], color=BLUE)
+        graph2d = axes2d.plot(fresca, x_range=[-5, 5], color=BLUE)
+        label2d = axes2d.get_graph_label(graph2d, label="fresca(x)")
 
-        label = axes.get_graph_label(graph, label="fresca(x)")
-
-        self.play(Create(axes), Create(graph), Write(label))
+        self.play(Create(axes2d), Create(graph2d), Write(label2d))
         self.wait()
 
-        axes = ThreeDAxes(
-            x_range=[-5, 5, 1],
-            y_range=[-1000, 1000, 200],  # adjust to your function range
-            z_range=[-1, 1, 1],  # small z-range since function is flat
-            x_length=10,
+        axes3d = ThreeDAxes(
+            x_range=[-8, 8, 1],
+            y_range=[-5, 5, 1],
+            z_range=[-5, 5, 1],
+            x_length=12,
             y_length=6,
-            z_length=2,
+            z_length=6,
             axis_config={"include_numbers": False},
         )
+        graph_group = VGroup(graph2d, label2d)
+        self.move_camera(phi=0 * DEGREES, theta=-90 * DEGREES, psi=-45 * DEGREES)
+        self.wait()
+        self.move_camera(phi=0 * DEGREES, theta=0 * DEGREES, psi=-45 * DEGREES)
 
-              graph_3d = ParametricFunction(
-            lambda t: np.array([t, fresca(t), 0]),
-            t_range=[-5, 5],
-            color=BLUE,
+        self.play(
+            ReplacementTransform(axes2d, axes3d)
+            graph_group.animate.move_to(axes3d.c2p(0, 0, 0)),
         )
 
-        self.add(axes, graph_3d)
-
-        # Start with camera looking straight down (2D view)
-        self.set_camera_orientation(phi=0 * DEGREES, theta=-90 * DEGREES)
-        self.wait(2)
-
-        # Animate the camera tilting to reveal 3D
-        self.move_camera(phi=75 * DEGREES, theta=-45 * DEGREES, run_time=4)
-        self.wait()
         
-        grid = NumberPlane(x_range=(-10, 10, 1), y_range=(-6.0, 6.0, 1))
-        grid_title = Tex("This is a grid")
-        grid_title.scale(1.5)
-        grid_title.move_to(transform_title)
-
-        self.add(grid, grid_title)
-        self.play(
-            FadeOut(title),
-            FadeIn(grid_title, shift=DOWN),
-            Create(grid, run_time=3, lag_ratio=0.1),
-        )
         self.wait()
 
-        grid_transform_title = Tex(
-            r"That was a non-linear function \\ applied to the grid"
-        )
-        grid_transform_title.move_to(grid_title, UL)
-        grid.prepare_for_nonlinear_transform()
-        self.play(
-            grid.animate.apply_function(
-                lambda p: p + np.array([np.sin(p[1]), np.sin(p[0]), 0])
-            ),
-            run_time=3,
-        )
-        self.wait()
-        self.play(Transform(grid_title, grid_transform_title))
-        self.wait()
