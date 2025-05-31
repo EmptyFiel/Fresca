@@ -108,4 +108,11 @@ class Fresca(ThreeDScene):
             
         surface = Surface()
     
-        self.wait(3)
+        
+        
+        #roate aroumd the x axis 
+        
+        #make circles around the perimeter
+        
+        # split off circle and take area
+        
