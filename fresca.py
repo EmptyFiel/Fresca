@@ -6,7 +6,7 @@ class Fresca(ThreeDScene):
     def construct(self):
         title = Tex(r"This is")
         fresca = MathTex(           
-            r"fresca(x) = 1.04 \cdot \begin{cases}"
+            r"fresca(x) = \cdot \begin{cases}"
             r"-211.17956(x + 4.69177)^4 + 2.064, & x < -4.566 \\"
             r"-0.387758(x + 3.93701)^3 + 0.611199x + 4.7054, & -4.566 \leq x < -3.45 \\"
             r"2.55197413677, & -3.45 \leq x < 4.2 \\"
@@ -44,15 +44,15 @@ class Fresca(ThreeDScene):
         
         def frescafunc(x):
             if -5 <= x < -4.566:
-                return 1.04 * (-211.17956 * (x + 4.69177)**4 + 2.064)
+                return (-211.17956 * (x + 4.69177)**4 + 2.064)
             elif -4.566 <= x < -3.45:
-                return 1.04 * (-0.387758 * (x + 3.93701)**3 + 0.611199 * x + 4.7054)
+                return (-0.387758 * (x + 3.93701)**3 + 0.611199 * x + 4.7054)
             elif -3.45 <= x < 4.2:
-                return 1.04 * 2.55197413677
+                return 2.55197413677
             elif 4.2 <= x < 4.5404:
-                return 1.04 * (-1.08589 * (x - 3.21577)**3 + 3.14421 * x - 9.61838)
+                return (-1.08589 * (x - 3.21577)**3 + 3.14421 * x - 9.61838)
             elif 4.5404 <= x <= 5:
-                return 1.04 * (-4374.95378 * (x - 4.69803)**7 - 0.117965 * x**5 + 8.47518 * x**3 - 274.62239 * x + 683.35717)
+                return (-4374.95378 * (x - 4.69803)**7 - 0.117965 * x**5 + 8.47518 * x**3 - 274.62239 * x + 683.35717)
             else:
                 return float("nan")
         
@@ -199,12 +199,43 @@ class Fresca(ThreeDScene):
             *[FadeOut(mob) for mob in self.mobjects]
         )
         
-        self.move_camera(phi=70 * DEGREES, theta=-135 * DEGREES, distance=12)
+        self.move_camera(phi=0 * DEGREES, theta=-90 * DEGREES, distance=12)
         
-        self.play(Write(MathTex(r"\text{Area} = \pi r^2")))\
-        
-        self.wait(3)
-        
-        
-        
-        
+        area_text = MathTex(r"\text{Area} = \pi ", "r", "^2")
+
+        circle = Circle(
+            radius=1,
+            color=RED,
+            stroke_width=2,
+            fill_opacity=0.3,
+            fill_color=RED
+        )
+
+        # Position everything first, then create radius line
+        VGroup(area_text, circle).arrange(DOWN, buff=1.5)
+
+        # Now create radius line based on circle's final position
+        center = circle.get_center()
+        top_point = center + UP * circle.radius
+        radius_line = Line(center, top_point, color=RED)
+        radius_label = MathTex("fresca(x)").next_to(radius_line, RIGHT, buff=0.1)
+
+        self.play(
+            Write(area_text),
+            FadeIn(circle),
+            Create(radius_line),
+            Write(radius_label)
+        )
+
+        self.wait()
+        area_text_fresca = MathTex(r"\text{Area} = \pi ", "fresca(x)", "^2")
+        VGroup(area_text_fresca, circle).arrange(DOWN, buff=1)
+        self.play(
+            ReplacementTransform(area_text, area_text_fresca)  
+        )
+        self.wait()
+        integrated_area = MathTex(r"\int_{-5}^{5}\pi \cdot fresca(x)^{2} \, dx")
+        VGroup(integrated_area, circle).arrange(DOWN, buff=1)
+
+        self.play(ReplacementTransform(area_text_fresca, integrated_area))
+        self.wait()
