@@ -84,35 +84,127 @@ class Fresca(ThreeDScene):
         
         self.move_camera(phi=80 * DEGREES, theta=-135 * DEGREES, distance=15)
         label3d = Text("fresca(x)", font_size=24).move_to(axes3d.c2p(6, 0, 3))
+        label3d.rotate(PI/2, axis=RIGHT)  # Orient text to face camera
+        label3d.move_to(axes3d.c2p(-6, 0, 4))  # Position in 3D space
+        
         self.play(
             ReplacementTransform(axes2d, axes3d),
             ReplacementTransform(graph2d,graph3d),
             ReplacementTransform(label2d, label3d)
         )
+        #rotate aroumd the x axis 
         
-        filled_area = axes3d.get_area(
-            graph3d, 
-            x_range=[-5, 5], 
-            color=BLUE, 
-            opacity=0.3
+        self.play(FadeOut(label3d))
+        
+        def surface_func(u, v):
+            x = u
+            r = abs(frescafunc(u))
+            y = r * np.cos(v)
+            z = r * np.sin(v)
+            return axes3d.c2p(x, y, z) 
+        
+        # Define the range for the surface
+        x_min, x_max = -5, 5
+        
+        surface = Surface(
+            surface_func,
+            u_range=[x_min, x_max],
+            v_range=[0, 2*PI],
+            resolution=(40, 20),
+            fill_opacity=0.7,
+            stroke_color=BLUE,
+            fill_color=BLUE_C
         )
         
-        self.play(
-            FadeIn(filled_area),
-            run_time=2
-        )
+        self.play(Create(surface), FadeOut(graph3d), run_time=3)
         self.wait()
+
+        circle_counts = [5, 10, 20, 40]  # Progressive refinement
+        all_circles = []
+        circle_text = None  # Track the current text object
         
-        self.play(
-            FadeOut(filled_area))
+        for i, num_circles in enumerate(circle_counts):
+            # Create x positions for this iteration
+            x_positions = np.linspace(-5, 5, num_circles)
+            current_circles = []
             
-        surface = Surface()
-    
+            for x_pos in x_positions:
+                radius = abs(frescafunc(x_pos))
+                if radius > 0.1:  # Only create circles for reasonable radii
+                    # Scale radius to match axes
+                    y_scale = axes3d.y_length / (axes3d.y_range[1] - axes3d.y_range[0])
+                    radius_scaled = radius * y_scale
+                    
+                    circle = Circle(
+                        radius=radius_scaled,
+                        color=RED,
+                        stroke_width=2,
+                        fill_opacity=0.3,
+                        fill_color=RED
+                    ).rotate(PI/2, axis=UP).move_to(axes3d.c2p(x_pos, 0, 0))
+                    current_circles.append(circle)
+            
+            if i == 0:
+                # First iteration - create all circles
+                self.play(
+                    LaggedStart(*[Create(circle) for circle in current_circles], lag_ratio=0.1),
+                    run_time=2
+                )
+                all_circles = current_circles
+            else:
+                # Subsequent iterations - transform to more circles
+                new_circles_group = VGroup(*current_circles)
+                old_circles_group = VGroup(*all_circles)
+                
+                self.play(
+                    ReplacementTransform(old_circles_group, new_circles_group),
+                    run_time=1.5
+                )
+                all_circles = current_circles
+            
+            # Create new text for this iteration
+            new_text = Text(f"{num_circles} cross-sections", font_size=24)
+            new_text.rotate(PI/2, axis=RIGHT)  # Orient text to face camera
+            new_text.move_to(axes3d.c2p(-6, 0, 4))  # Position in 3D space
+            
+            if circle_text is None:
+                # First text - just write it
+                self.play(Write(new_text))
+                circle_text = new_text
+            else:
+                # Replace the old text with new text
+                self.play(
+                    FadeOut(circle_text),
+                    FadeIn(new_text)
+                )
+                circle_text = new_text
+            
+            self.wait(1)
+        
+        # Final text
+        
+        self.play(FadeOut(surface))
+        
+        final_text = Text("Infinite cross-sections = Solid", font_size=24)
+        final_text.rotate(PI/2, axis=RIGHT)
+        final_text.move_to(axes3d.c2p(-6, 0, 4))
+        self.play(
+            FadeOut(circle_text),
+            FadeIn(final_text)
+        )
+        circle_text = final_text
+        self.wait(2)
+            
+        self.play(
+            *[FadeOut(mob) for mob in self.mobjects]
+        )
+        
+        self.move_camera(phi=70 * DEGREES, theta=-135 * DEGREES, distance=12)
+        
+        self.play(Write(MathTex(r"\text{Area} = \pi r^2")))\
+        
+        self.wait(3)
         
         
-        #roate aroumd the x axis 
         
-        #make circles around the perimeter
-        
-        # split off circle and take area
         
