@@ -191,7 +191,7 @@ class Fresca(ThreeDScene):
                 
                 self.play(
                     ReplacementTransform(old_circles_group, new_circles_group),
-                    run_time=1.5
+                    run_time=.5
                 )
                 all_circles = current_circles
             
@@ -212,7 +212,7 @@ class Fresca(ThreeDScene):
                 )
                 circle_text = new_text
             
-            self.wait(1)
+            self.wait(.5)
         
         # Final text
         
@@ -263,12 +263,24 @@ class Fresca(ThreeDScene):
         self.wait()
         area_text_fresca = MathTex(r"\text{Area} = \pi ", "fresca(x)", "^2")
         VGroup(area_text_fresca, circle).arrange(DOWN, buff=1)
+        center = circle.get_center()
+        top_point = center + UP * circle.radius
+        radius_line = Line(center, top_point, color=RED)
+        radius_label = MathTex("fresca(x)").next_to(radius_line, RIGHT, buff=0.1)
         self.play(
-            ReplacementTransform(area_text, area_text_fresca)  
+            ReplacementTransform(area_text, area_text_fresca),
+            Create(radius_line),
+            Write(radius_label)
         )
         self.wait()
         integrated_area = MathTex(r"\int_{-5}^{5}\pi \cdot fresca(x)^{2} \, dx")
         VGroup(integrated_area, circle).arrange(DOWN, buff=1)
-
-        self.play(ReplacementTransform(area_text_fresca, integrated_area))
+        center = circle.get_center()
+        top_point = center + UP * circle.radius
+        radius_line = Line(center, top_point, color=RED)
+        radius_label = MathTex("fresca(x)").next_to(radius_line, RIGHT, buff=0.1)
+        self.play(ReplacementTransform(area_text_fresca, integrated_area),
+                  Create(radius_line),
+                  Write(radius_label)
+        )
         self.wait()
