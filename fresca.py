@@ -1,6 +1,7 @@
 from manim import *
 import numpy as np
 
+#pi 1.04**2 4.83/10 cubed fresca integrated .554113
 
 class Fresca(ThreeDScene):
     def construct(self):
