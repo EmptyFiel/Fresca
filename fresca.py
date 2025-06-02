@@ -260,7 +260,7 @@ class Fresca(ThreeDScene):
             Write(radius_label)
         )
 
-        self.wait()
+        self.wait(5)
         area_text_fresca = MathTex(r"\text{Area} = \pi ", "fresca(x)", "^2")
         VGroup(area_text_fresca, circle).arrange(DOWN, buff=1)
         center = circle.get_center()
@@ -272,7 +272,7 @@ class Fresca(ThreeDScene):
             Create(radius_line),
             Write(radius_label)
         )
-        self.wait()
+        self.wait(5)
         integrated_area = MathTex(r"\int_{-5}^{5}\pi \cdot fresca(x)^{2} \, dx")
         VGroup(integrated_area, circle).arrange(DOWN, buff=1)
         center = circle.get_center()
