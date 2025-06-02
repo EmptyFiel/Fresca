@@ -116,6 +116,39 @@ class Fresca(ThreeDScene):
             fill_color=BLUE_C
         )
         
+        
+        def get_partial_surface(alpha):
+            return Surface(
+                lambda u, v: np.array([
+                    u,
+                    np.cos(v * alpha) * np.sqrt(u),
+                    np.sin(v * alpha) * np.sqrt(u)
+                ]),
+                u_range=[0, 4],
+                v_range=[0, TAU],
+                resolution=(40, 40),
+                fill_opacity=0.7,
+                fill_color=BLUE_C,
+                stroke_color=BLUE
+            )
+
+        # Initial partial surface
+        partial_surface = get_partial_surface(0)
+        self.add(partial_surface)
+
+        # Animate rotation
+        def update_surface(mob, alpha):
+            new_surf = get_partial_surface(alpha)
+            mob.become(new_surf)
+
+        self.play(UpdateFromAlphaFunc(partial_surface, update_surface), run_time=4)
+        self.wait(2)
+        
+        
+        
+        
+        
+        surface.rotate(angle=PI/2, axis=UP)
         self.play(Create(surface), FadeOut(graph3d), run_time=3)
         self.wait()
 
