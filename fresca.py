@@ -1,8 +1,6 @@
 from manim import *
 import numpy as np
 
-#pi 1.04**2 4.83/10 cubed fresca integrated .554113
-
 class Fresca(ThreeDScene):
     def construct(self):
         title = Tex(r"This is")
@@ -116,16 +114,16 @@ class Fresca(ThreeDScene):
             stroke_color=BLUE,
             fill_color=BLUE_C
         )
-        
+
         
         def get_partial_surface(alpha):
             return Surface(
-                lambda u, v: np.array([
+                lambda u, v: axes3d.c2p(
                     u,
-                    np.cos(v * alpha) * np.sqrt(u),
-                    np.sin(v * alpha) * np.sqrt(u)
-                ]),
-                u_range=[0, 4],
+                    np.cos((v * alpha) + np.pi/2) * abs(frescafunc(u)),
+                    np.sin((v * alpha) + np.pi/2) * abs(frescafunc(u))
+                ),
+                u_range=[-5, 5],
                 v_range=[0, TAU],
                 resolution=(40, 40),
                 fill_opacity=0.7,
@@ -149,8 +147,8 @@ class Fresca(ThreeDScene):
         
         
         
-        surface.rotate(angle=PI/2, axis=UP)
-        self.play(Create(surface), FadeOut(graph3d), run_time=3)
+        #surface.rotate(angle=PI/2, axis=UP)
+        #self.play(Create(surface), FadeOut(graph3d), run_time=3)
         self.wait()
 
         circle_counts = [5, 10, 20, 40]  # Progressive refinement
@@ -236,7 +234,6 @@ class Fresca(ThreeDScene):
         self.move_camera(phi=0 * DEGREES, theta=-90 * DEGREES, distance=12)
         
         area_text = MathTex(r"\text{Area} = \pi ", "r", "^2")
-
         circle = Circle(
             radius=1,
             color=RED,
@@ -244,44 +241,46 @@ class Fresca(ThreeDScene):
             fill_opacity=0.3,
             fill_color=RED
         )
-
-        # Position everything first, then create radius line
-        VGroup(area_text, circle).arrange(DOWN, buff=1.5)
-
-        # Now create radius line based on circle's final position
         center = circle.get_center()
         top_point = center + UP * circle.radius
         radius_line = Line(center, top_point, color=RED)
         radius_label = MathTex("fresca(x)").next_to(radius_line, RIGHT, buff=0.1)
 
-        self.play(
-            Write(area_text),
-            FadeIn(circle),
-            Create(radius_line),
-            Write(radius_label)
-        )
+        circle_vgroup = VGroup(circle, radius_line, radius_label)
+        text_circle = VGroup(area_text, circle_vgroup).arrange(DOWN, buff=1.5)
 
+        self.add(text_circle)
         self.wait(5)
+
         area_text_fresca = MathTex(r"\text{Area} = \pi ", "fresca(x)", "^2")
-        VGroup(area_text_fresca, circle).arrange(DOWN, buff=1)
-        center = circle.get_center()
-        top_point = center + UP * circle.radius
-        radius_line = Line(center, top_point, color=RED)
-        radius_label = MathTex("fresca(x)").next_to(radius_line, RIGHT, buff=0.1)
-        self.play(
-            ReplacementTransform(area_text, area_text_fresca),
-            Create(radius_line),
-            Write(radius_label)
-        )
+        area_text_fresca.move_to(text_circle[0])
+
+        self.play(ReplacementTransform(text_circle[0], area_text_fresca))
+        text_circle[0] = area_text_fresca
         self.wait(5)
+
         integrated_area = MathTex(r"\int_{-5}^{5}\pi \cdot fresca(x)^{2} \, dx")
-        VGroup(integrated_area, circle).arrange(DOWN, buff=1)
-        center = circle.get_center()
-        top_point = center + UP * circle.radius
-        radius_line = Line(center, top_point, color=RED)
-        radius_label = MathTex("fresca(x)").next_to(radius_line, RIGHT, buff=0.1)
-        self.play(ReplacementTransform(area_text_fresca, integrated_area),
-                  Create(radius_line),
-                  Write(radius_label)
+        integrated_area.move_to(text_circle[0])
+
+        self.play(ReplacementTransform(text_circle[0], integrated_area))
+        text_circle[0] = integrated_area
+        self.wait(3)
+        #4.83/10 cubed fresca integrated .554113
+        
+        self.play(
+            *[FadeOut(mob) for mob in self.mobjects]
         )
+                
+        integrated_area = MathTex(r"\int_{-5}^{5}\pi \cdot fresca(x)^{2} \, dx")
+        u_to_in = MathTex(r"\left(\frac{4.83}{10}^{3}\right)\int_{-5}^{5}\pi\cdot fresca(x)^{2}dx")
+        in_to_fl = MathTex(r"\left(.554113\right)\frac{4.83}{10}^{3}\int_{-5}^{5}\pi\cdot fresca(x)^{2}dx")
+
+        self.play(Write(integrated_area))
         self.wait()
+
+        u_to_in.move_to(integrated_area)
+        self.play(ReplacementTransform(integrated_area, u_to_in))
+        self.wait()
+
+        in_to_fl.move_to(u_to_in)
+        self.play(ReplacementTransform(u_to_in, in_to_fl))
