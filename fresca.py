@@ -274,7 +274,7 @@ class Fresca(ThreeDScene):
         integrated_area = MathTex(r"\int_{-5}^{5}\pi \cdot fresca(x)^{2} \, dx")
         u_to_in = MathTex(r"\left(\frac{4.83}{10}^{3}\right)\int_{-5}^{5}\pi\cdot fresca(x)^{2}dx")
         in_to_fl = MathTex(r"\left(.554113\right)\frac{4.83}{10}^{3}\int_{-5}^{5}\pi\cdot fresca(x)^{2}dx")
-
+        scalar = MathTex(r"\left(1.04^{2}\right).554113\frac{4.83}{10}^{3}\int_{-5}^{5}\pi\cdot fresca(x)^{2}dx")
         self.play(Write(integrated_area))
         self.wait()
 
@@ -284,3 +284,8 @@ class Fresca(ThreeDScene):
 
         in_to_fl.move_to(u_to_in)
         self.play(ReplacementTransform(u_to_in, in_to_fl))
+        self.wait()
+        
+        scalar.move_to(in_to_fl)
+        self.play(ReplacementTransform(in_to_fl, scalar))
+        self.wait()
